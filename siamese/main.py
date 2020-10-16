@@ -17,7 +17,7 @@ import os
 import argparse
 
 from omniglot_dataset import OmniglotTrain, OmniglotTest
-from model import Siamese
+from model import Siamese, SiameseLeNet5
 
 def main(args):
 
@@ -44,7 +44,10 @@ def main(args):
     loss_fn = torch.nn.BCEWithLogitsLoss()
     
     # instantiate the Siamese net
-    net = Siamese()
+    if args.lenet5:
+        net = SiameseLeNet5()
+    else:
+        net = Siamese()
 
     if args.cuda:
         net.cuda()
@@ -140,6 +143,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description="Code to train Siamese network")
 
     parser.add_argument("--cuda", help="use", action='store_true')
+    parser.add_argument("--lenet5", help="use", action='store_true')
 
     parser.add_argument("--train-path", default="./", nargs="+", metavar="TRAIN_PATH", help="Path to the training dataset", type=str)
     parser.add_argument("--test-path", default="./", nargs="+", metavar="TEST_PATH", help="Path to the training dataset", type=str)

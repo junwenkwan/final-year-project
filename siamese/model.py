@@ -38,8 +38,35 @@ class Siamese(nn.Module):
         return out
 
 
-# for test
-if __name__ == '__main__':
-    net = Siamese()
-    print(net)
-    # print(list(net.parameters()))
+class SiameseLeNet5(nn.Module):
+    def __init__(self):
+        super(SiameseLeNet5, self).__init__()
+        self.conv = nn.Sequential(
+            nn.Conv2d(1, 6, 5), 
+            nn.ReLU(),
+            nn.MaxPool2d(2),  
+
+            nn.Conv2d(6, 16, 5),
+            nn.ReLU(),  
+            nn.MaxPool2d(2),   
+        )
+        self.linear1 = nn.Sequential(nn.Linear(8464, 120), nn.ReLU())
+        self.linear2 = nn.Sequential(nn.Linear(120, 84), nn.ReLU())
+        self.linear3 = nn.Linear(84, 1)
+
+    def forward_one(self, x):
+        x = self.conv(x)
+        x = x.view(x.size()[0], -1)
+        x = self.linear1(x)
+        x = self.linear2(x)
+        return x
+
+    def forward(self, x1, x2):
+        y1 = self.forward_one(x1)
+        y2 = self.forward_one(x2)
+        distance = torch.abs(y1 - y2)
+        out = self.linear3(distance)
+        #  return self.sigmoid(out)
+        return out  
+
+
