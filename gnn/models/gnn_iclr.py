@@ -81,9 +81,10 @@ class AdjMatCompute(nn.Module):
 
     def forward(self, x, W_id):
         W1 = x.unsqueeze(2) # self
-        W2 = torch.transpose(W1, 1, 2) #neighbour, size: bs x N x N x num_features
-        # W1.shape: torch.Size([100, 6, 1, 165])
-        # W2.shape: torch.Size([100, 1, 6, 165])
+
+        W2 = torch.transpose(W1, 1, 2) #neighbour
+        # W1.shape: torch.Size([batch_size, 6, 1, 69])
+        # W2.shape: torch.Size([batch_size, 1, 6, 69])
 
         W_new = torch.abs(W1 - W2) #size: bs x N x N x num_features
         # W_new.shape: torch.Size([10, 6, 6, 165])
@@ -162,7 +163,9 @@ class GNN_nl_omniglot(nn.Module):
         self.layer_last = GcBlock(self.input_features + int(self.nf / 2) * self.num_layers, args.train_N_way, 2, bn_bool=True)
 
     def forward(self, nodes):
+        # nodes.shape: torch.Size([batch_size, 6, 69])
         W_init = Variable(torch.eye(nodes.size(1)).unsqueeze(0).repeat(nodes.size(0), 1, 1).unsqueeze(3))
+        # W_init.shape: torch.Size([batch_size, 6, 6, 1])
         if self.args.cuda:
             W_init = W_init.cuda()
 
@@ -176,6 +179,8 @@ class GNN_nl_omniglot(nn.Module):
         Wl=self.w_comp_last(nodes, W_init)
         out = self.layer_last([Wl, nodes])[1]
 
+        # out.shape: torch.Size([batch_size, 6, 5])
+        # out[:, 0, :].shape: torch.Size([batch_size, 5])
         return out[:, 0, :]
 
 
