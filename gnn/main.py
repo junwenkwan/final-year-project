@@ -25,19 +25,24 @@ def initialise_folders():
 def train_batch(model, data):
     [enc_nn, metric_nn, softmax_module] = model
     [batch_x, label_x, batches_xi, labels_yi, oracles_yi, hidden_labels] = data
+    # batch_x.shape: torch.Size([batch_size, 1, 28, 28])
+    # len(batches_xi): 5
+    # batches_xi[0].shape: torch.Size([batch_size, 1, 28, 28])
+    # len(labels_yi): 5
+    # labels_yi[0].shape: torch.Size([batch_size, 5])
 
     # Compute embedding from x and xi_s
-    # tensor: torch.Size([100, 64])
-    z = enc_nn(batch_x)[-1]
+    # tensor: torch.Size([batch_size, 64])
+    z = enc_nn(batch_x)[-1] # 1 image
     
     # list of tensors
-    # tensor: torch.Size([100, 64])
-    zi_s = [enc_nn(batch_xi)[-1] for batch_xi in batches_xi]
+    # tensor: torch.Size([batch_size, 64])
+    zi_s = [enc_nn(batch_xi)[-1] for batch_xi in batches_xi] # 5 images
 
     # Compute metric from embeddings
     out_metric, out_logits = metric_nn(inputs=[z, zi_s, labels_yi, oracles_yi, hidden_labels])
+    # out_logits: torch.Size([batch_size, 5])
 
-    # out_logits.shape: torch.Size([100, 20])
     logsoft_prob = softmax_module.forward(out_logits)
 
     # Loss
@@ -47,8 +52,16 @@ def train_batch(model, data):
     if args.cuda:
         formatted_label_x = formatted_label_x.cuda()
 
+    # label_x_numpy: [0. 1. 0. 0. 0.]
+    # logsoft_prob: tensor([-1.2869, -1.3503, -1.6392, -1.9125, -2.0964], device='cuda:0', grad_fn=<SelectBackward>)
+    # formatted_label_x: tensor(1, device='cuda:0')
+    # formatted_label_x.shape: torch.Size([100])
+    
     # F.nll_loss: the negative log likelihood loss.
-    loss = F.nll_loss(logsoft_prob, formatted_label_x)
+    if args.cross_entropy_loss: 
+        loss = F.cross_entropy(logsoft_prob,formatted_label_x)
+    else:
+        loss = F.nll_loss(logsoft_prob, formatted_label_x)
     loss.backward()
 
     return loss
@@ -70,7 +83,7 @@ def main(args):
         enc_nn.cuda()
         metric_nn.cuda()
 
-    # io.cprint(str(enc_nn))
+    io.cprint(str(enc_nn))
     io.cprint(str(metric_nn))
 
     if args.dataset == 'mini_imagenet':
@@ -206,6 +219,8 @@ if __name__ == "__main__":
     parser.add_argument('--test_samples', type=int, default=30000, metavar='N', help='Number of shots')
     parser.add_argument('--dataset', type=str, default='mini_imagenet', metavar='N', help='omniglot')
     parser.add_argument('--dec_lr', type=int, default=10000, metavar='N', help='Decreasing the learning rate every x iterations')
+
+    parser.add_argument('--cross_entropy_loss', action='store_true', default=False, help='cross entropy loss')
     args = parser.parse_args()
 
     initialise_folders()
