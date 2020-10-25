@@ -93,36 +93,39 @@ def main(args):
         
         # args.test_every = 100
         if batch_id % args.test_every == 0:
-            right, error = 0, 0
-            for _, (test1, test2, label) in enumerate(testLoader, 1):
-                if args.cuda:
-                    test1, test2, label = test1.cuda(), test2.cuda(), label.cuda()
+            with torch.no_grad():
+                right, error = 0, 0
+                net.eval()
+                for _, (test1, test2, label) in enumerate(testLoader, 1):
+                    if args.cuda:
+                        test1, test2, label = test1.cuda(), test2.cuda(), label.cuda()
+                    
+                    # img1 and img2    
+                    test1, test2, label = Variable(test1), Variable(test2), Variable(label)
+                    output = net.forward(test1, test2).data.cpu().numpy()
+                    # output size is 20
+                    pred = np.argmax(output)
+                    # pred size is 1
 
-                # img1 and img2    
-                test1, test2, label = Variable(test1), Variable(test2), Variable(label)
-                output = net.forward(test1, test2).data.cpu().numpy()
-                # output size is 20
-                pred = np.argmax(output)
-                # pred size is 1
+                    if pred == 0:
+                        right += 1
+                    else: error += 1
 
-                if pred == 0:
-                    right += 1
-                else: error += 1
+                print('*'*20)
+                print('[%d]\tTest set\tcorrect:\t%d\terror:\t%d\taccuracy:\t%f'%(batch_id, right, error, right*1.0/(right+error)))
+                print('*'*20)
+                queue.append(right*1.0/(right+error))
+                accuracy = right*1.0/(right+error)
+                train_acc.append(accuracy)
+                net.train()
 
-            print('*'*20)
-            print('[%d]\tTest set\tcorrect:\t%d\terror:\t%d\taccuracy:\t%f'%(batch_id, right, error, right*1.0/(right+error)))
-            print('*'*20)
-            queue.append(right*1.0/(right+error))
-            accuracy = right*1.0/(right+error)
-            train_acc.append(accuracy)
-            
+        if batch_id % 100 == 0:
             learning_rate = learning_rate * 0.99
             for param_group in optimizer.param_groups:
                 param_group['lr'] = learning_rate
+
         # append loss    
         train_loss.append(loss_val)
-        
-
 
     with open('train_loss', 'wb') as f:
         pickle.dump(train_loss, f)
@@ -149,7 +152,7 @@ if __name__ == '__main__':
     parser.add_argument("--test-path", default="./", nargs="+", metavar="TEST_PATH", help="Path to the training dataset", type=str)
     parser.add_argument("--model-path", default="./", nargs="+", metavar="MODEL_PATH", help="Path to the saved models", type=str)
 
-    parser.add_argument("--way", default=20, help="Number of ways", type=int)
+    parser.add_argument("--way", default=5, help="Number of ways", type=int)
     parser.add_argument("--times", default=400, help="Number of samples to test accuracy", type=int)
     parser.add_argument("--workers", default=4, help="Number of dataloader workers", type=int)
     parser.add_argument("--batch-size", default=128, help="Number of batch size", type=int)
@@ -160,7 +163,7 @@ if __name__ == '__main__':
     parser.add_argument("--test-every", default=100, help="test result after each test_every iter", type=int)
     parser.add_argument("--save-every", default=10000, help="save model after each save_every iter", type=int)
 
-    parser.add_argument("--max-iter", default=80000, help="number of iterations before stopping", type=int)
+    parser.add_argument("--max-iter", default=50000, help="number of iterations before stopping", type=int)
     parser.add_argument("--gpu-ids", default=0, help="gpu ids used for training", type=str)
 
     args = parser.parse_args()
