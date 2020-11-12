@@ -9,9 +9,9 @@ Few-shot learning experiments include:
 The overall results are summarized below.
 |              | 1 shot 5 ways | 1 shot 20 ways|
 | ------------ | ------------- | ------------- |
-| Siamese Net  | 95.3% | 85.7% |
-| MAML  | 99.2% | 96.6% |
-| GNN   | 99.3% | 97.8% |
+| Siamese Net [1]  | 95.3% | 85.7% |
+| MAML [2]  | 99.2% | 96.6% |
+| GNN [3]  | 99.3% | 97.8% |
 
 
 |              | 5 shots 5 ways | 5 shots 20 ways|
@@ -29,6 +29,13 @@ The overall results are summarized below.
 | -------------- | -------------- |
 | ![1shot5ways](./images/loss_1_shot_5_ways.png) | ![1shot20ways](./images/loss_1_shot_20_ways.png) |
 | ![5shots5ways](./images/loss_5_shots_5_ways.png) | ![5shots20ways](./images/loss_5_shots_20_ways.png) |
+
+## References
+[1] G. Koch, R.Zemel and R.Salakhutdinov, “Siamese Neural Networks for One-shot Image Recognition”, Proceedings of the 32nd International Conference on Machine Learning, vol 37, 2015.
+
+[2] C. Finn, P. Abbeel and S. Levine,“Model-Agnostic Meta-Learning for Fast Adaptation of Deep Networks”, Proceedings of the 34th International Conference on Machine Learning (PMLR), 2017.
+
+[3] V. Garcia and J. Bruna, “Few-Shot Learning with Graph Neural Networks”, Sixth International Conference on Learning Representations (ICLR), 2018.
 
 ## Credits
 * [fangpin/siamese-pytorch](https://github.com/fangpin/siamese-pytorch)
