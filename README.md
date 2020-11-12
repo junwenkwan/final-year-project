@@ -24,6 +24,12 @@ The overall results are summarized below.
 | ![1shot5ways](./images/acc_1_shot_5_ways.png) | ![1shot20ways](./images/acc_1_shot_20_ways.png) |
 | ![5shots5ways](./images/acc_5_shots_5_ways.png) | ![5shots20ways](./images/acc_5_shots_20_ways.png) |
 
+
+| 5 ways      | 20 ways       |
+| -------------- | -------------- |
+| ![1shot5ways](./images/loss_1_shot_5_ways.png) | ![1shot20ways](./images/loss_1_shot_20_ways.png) |
+| ![5shots5ways](./images/loss_5_shots_5_ways.png) | ![5shots20ways](./images/loss_5_shots_20_ways.png) |
+
 ## Credits
 * [fangpin/siamese-pytorch](https://github.com/fangpin/siamese-pytorch)
 * [vgsatorras/few-shot-gnn](https://github.com/vgsatorras/few-shot-gnn)
