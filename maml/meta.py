@@ -9,17 +9,11 @@ import  numpy as np
 from    learner import Learner
 from    copy import deepcopy
 
-
-
 class Meta(nn.Module):
     """
     Meta Learner
     """
     def __init__(self, args, config):
-        """
-
-        :param args:
-        """
         super(Meta, self).__init__()
 
         self.update_lr = args.update_lr
@@ -31,40 +25,11 @@ class Meta(nn.Module):
         self.update_step = args.update_step # 5
         self.update_step_test = args.update_step_test # 10
 
-
         self.net = Learner(config, args.imgc, args.imgsz)
         self.meta_optim = optim.Adam(self.net.parameters(), lr=self.meta_lr)
 
-
-
-
-    def clip_grad_by_norm_(self, grad, max_norm):
-        """
-        in-place gradient clipping.
-        :param grad: list of gradients
-        :param max_norm: maximum norm allowable
-        :return:
-        """
-
-        total_norm = 0
-        counter = 0
-        for g in grad:
-            param_norm = g.data.norm(2)
-            total_norm += param_norm.item() ** 2
-            counter += 1
-        total_norm = total_norm ** (1. / 2)
-
-        clip_coef = max_norm / (total_norm + 1e-6)
-        if clip_coef < 1:
-            for g in grad:
-                g.data.mul_(clip_coef)
-
-        return total_norm/counter
-
-
     def forward(self, x_spt, y_spt, x_qry, y_qry):
         """
-
         :param x_spt:   [b, setsz, c_, h, w]
         :param y_spt:   [b, setsz]
         :param x_qry:   [b, querysz, c_, h, w]
@@ -72,14 +37,16 @@ class Meta(nn.Module):
         :return:
         """
         task_num, setsz, c_, h, w = x_spt.size()
+        # x_spt.shape: [16, 5, 1, 28, 28]
+        # x_qry.shape: [16, 75, 1, 28, 28]
+
         querysz = x_qry.size(1)
 
         # [0, 0, 0, 0, 0, 0]
         losses_q = [0 for _ in range(self.update_step + 1)]  # losses_q[i] is the loss on step i
         corrects = [0 for _ in range(self.update_step + 1)]
 
-
-        for i in range(task_num):
+        for i in range(task_num): # 16
 
             # 1. run the i-th task and compute loss for k=0
             logits = self.net(x_spt[i], vars=None, bn_training=True)
@@ -93,8 +60,12 @@ class Meta(nn.Module):
                 logits_q = self.net(x_qry[i], self.net.parameters(), bn_training=True)
                 loss_q = F.cross_entropy(logits_q, y_qry[i])
                 losses_q[0] += loss_q
+                # logits_q.shape: [75, 5]
 
                 pred_q = F.softmax(logits_q, dim=1).argmax(dim=1)
+                # pred_q.shape: [75]
+                # y_qry.shape: [16, 75]
+
                 correct = torch.eq(pred_q, y_qry[i]).sum().item()
                 corrects[0] = corrects[0] + correct
 
@@ -128,8 +99,6 @@ class Meta(nn.Module):
                     correct = torch.eq(pred_q, y_qry[i]).sum().item()  # convert to numpy
                     corrects[k + 1] = corrects[k + 1] + correct
 
-
-
         # end of all tasks
         # sum over all losses on query set across all tasks
         loss_q = losses_q[-1] / task_num
@@ -142,15 +111,12 @@ class Meta(nn.Module):
         # 	print(torch.norm(p).item())
         self.meta_optim.step()
 
-
         accs = np.array(corrects) / (querysz * task_num)
 
         return accs, loss_q.item()
 
-
     def finetunning(self, x_spt, y_spt, x_qry, y_qry):
         """
-
         :param x_spt:   [setsz, c_, h, w]
         :param y_spt:   [setsz]
         :param x_qry:   [querysz, c_, h, w]
@@ -210,7 +176,6 @@ class Meta(nn.Module):
                 pred_q = F.softmax(logits_q, dim=1).argmax(dim=1)
                 correct = torch.eq(pred_q, y_qry).sum().item()  # convert to numpy
                 corrects[k + 1] = corrects[k + 1] + correct
-
 
         del net
 

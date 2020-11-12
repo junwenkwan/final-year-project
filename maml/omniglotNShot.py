@@ -59,8 +59,6 @@ class OmniglotNShot:
         # can not shuffle here, we must keep training and test set distinct!
         self.x_train, self.x_test = self.x[:1200], self.x[1200:]
 
-        # self.normalization()
-
         self.batchsz = batchsz # tasknum: 32
         self.n_cls = self.x.shape[0]  # 1623
         self.n_way = n_way  # n way: 20
@@ -75,25 +73,6 @@ class OmniglotNShot:
 
         self.datasets_cache = {"train": self.load_data_cache(self.datasets["train"]),  # current epoch data cached
                                "test": self.load_data_cache(self.datasets["test"])}
-
-    def normalization(self):
-        """
-        Normalizes our data, to have a mean of 0 and sdt of 1
-        """
-        self.mean = np.mean(self.x_train)
-        self.std = np.std(self.x_train)
-        self.max = np.max(self.x_train)
-        self.min = np.min(self.x_train)
-        # print("before norm:", "mean", self.mean, "max", self.max, "min", self.min, "std", self.std)
-        self.x_train = (self.x_train - self.mean) / self.std
-        self.x_test = (self.x_test - self.mean) / self.std
-
-        self.mean = np.mean(self.x_train)
-        self.std = np.std(self.x_train)
-        self.max = np.max(self.x_train)
-        self.min = np.min(self.x_train)
-
-    # print("after norm:", "mean", self.mean, "max", self.max, "min", self.min, "std", self.std)
 
     def load_data_cache(self, data_pack):
         """
@@ -139,7 +118,6 @@ class OmniglotNShot:
                 x_qrys.append(x_qry)
                 y_qrys.append(y_qry)
 
-
             # [b, setsz, 1, 84, 84]
             x_spts = np.array(x_spts).astype(np.float32).reshape(self.batchsz, setsz, 1, self.resize, self.resize)
             y_spts = np.array(y_spts).astype(np.int).reshape(self.batchsz, setsz)
@@ -168,10 +146,6 @@ class OmniglotNShot:
 
         return next_batch
 
-
-
-
-
 if __name__ == '__main__':
 
     import  time
@@ -179,13 +153,12 @@ if __name__ == '__main__':
     import  visdom
 
     # plt.ion()
-    viz = visdom.Visdom(env='omniglot_view')
+    viz = visdom.Visdom(env='main')
 
-    db = OmniglotNShot('db/omniglot', batchsz=20, n_way=5, k_shot=5, k_query=15, imgsz=64)
+    db = OmniglotNShot('/home/jun/fypv2/omniglot/python', batchsz=32, n_way=5, k_shot=1, k_query=15, imgsz=28)
 
     for i in range(1000):
         x_spt, y_spt, x_qry, y_qry = db.next('train')
-
 
         # [b, setsz, h, w, c] => [b, setsz, c, w, h] => [b, setsz, 3c, w, h]
         x_spt = torch.from_numpy(x_spt)
@@ -194,12 +167,10 @@ if __name__ == '__main__':
         y_qry = torch.from_numpy(y_qry)
         batchsz, setsz, c, h, w = x_spt.size()
 
-
         viz.images(x_spt[0], nrow=5, win='x_spt', opts=dict(title='x_spt'))
         viz.images(x_qry[0], nrow=15, win='x_qry', opts=dict(title='x_qry'))
         viz.text(str(y_spt[0]), win='y_spt', opts=dict(title='y_spt'))
         viz.text(str(y_qry[0]), win='y_qry', opts=dict(title='y_qry'))
 
-
-        time.sleep(10)
+        time.sleep(100)
 
