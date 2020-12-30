@@ -1,9 +1,13 @@
 # ECE4095 Final Year Project
+This is my final year project at Monash University. This project is supervised by Dr Mehrtash Harandi and Dr Masoud Faraki.
+
 ## Few-Shot Learning 
 Few-shot learning experiments include:
 * Siamese network [[paper](https://www.cs.cmu.edu/~rsalakhu/papers/oneshot1.pdf)]
 * Graph Neural Network (GNN) [[paper](https://openreview.net/pdf?id=BJj6qGbRW)]
 * Model-Agnostic Meta-Learning (MAML) [[paper](https://arxiv.org/pdf/1703.03400.pdf)]
+## Poster
+![poster](./images/poster.png)
 
 ## Results
 The overall results are summarized below.
