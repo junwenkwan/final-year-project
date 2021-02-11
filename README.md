@@ -1,5 +1,6 @@
 # ECE4095 Final Year Project
-This is my final year project at Monash University. This project is supervised by Dr Mehrtash Harandi and Dr Masoud Faraki.
+* This is my final year project at Monash University. 
+* This project is supervised by Dr Mehrtash Harandi and Dr Masoud Faraki.
 
 ## Few-Shot Learning 
 Few-shot learning experiments include:
