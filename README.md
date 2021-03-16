@@ -1,6 +1,7 @@
 # ECE4095 Final Year Project
 * This is my final year project at Monash University. 
 * This project is supervised by Dr Mehrtash Harandi and Dr Masoud Faraki.
+* ECSE Spark Night 2020 website: [https://www.ecsespark.com/draft-b/few-shot-learning](https://www.ecsespark.com/draft-b/few-shot-learning)
 
 ## Few-Shot Learning 
 Few-shot learning experiments include:
